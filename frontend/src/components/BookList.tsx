@@ -4,7 +4,10 @@ import type { Book, BookResponse } from '../types/Book';
 import { useCart } from '../context/CartContext';
 import CategoryFilter from './CategoryFilter';
 
+// Main book listing page with category filtering, pagination, and cart integration
+// Uses Bootstrap Grid (row/col) for sidebar + main content layout
 function BookList() {
+  // Book data and pagination state
   const [books, setBooks] = useState<Book[]>([]);
   const [pageNum, setPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -18,12 +21,14 @@ function BookList() {
   const { addToCart, totalItems, totalPrice } = useCart();
   const navigate = useNavigate();
 
+  // Fetch books from the API whenever pagination, sort, or category changes
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
       setError(null);
 
       try {
+        // Build API URL with query parameters
         let url = `/api/books?pageNum=${pageNum}&pageSize=${pageSize}&sortOrder=${sortOrder}`;
         if (selectedCategory) {
           url += `&category=${encodeURIComponent(selectedCategory)}`;
@@ -49,17 +54,19 @@ function BookList() {
     fetchBooks();
   }, [pageNum, pageSize, sortOrder, selectedCategory]);
 
+  // Reset to page 1 when category changes so user doesn't land on an empty page
   const handleCategoryChange = (category: string | null) => {
     setSelectedCategory(category);
     setPageNum(1);
   };
 
+  // Add a book to the shopping cart
   const handleAddToCart = (book: Book) => {
     addToCart(book);
   };
 
+  // Navigate to the cart page and save current browsing state for "Continue Shopping"
   const goToCart = () => {
-    // Save current state so "Continue Shopping" can return here
     sessionStorage.setItem(
       'lastBookListState',
       JSON.stringify({ pageNum, pageSize, sortOrder, selectedCategory })
@@ -67,7 +74,7 @@ function BookList() {
     navigate('/cart');
   };
 
-  // Restore state from sessionStorage on mount (for Continue Shopping)
+  // Restore browsing state on mount so "Continue Shopping" returns to the same page
   useEffect(() => {
     const saved = sessionStorage.getItem('lastBookListState');
     if (saved) {
@@ -82,7 +89,7 @@ function BookList() {
 
   return (
     <div className="row">
-      {/* Category sidebar */}
+      {/* Category filter sidebar (Bootstrap Grid col-md-3) */}
       <div className="col-md-3 mb-4">
         <CategoryFilter
           selectedCategory={selectedCategory}
@@ -90,9 +97,9 @@ function BookList() {
         />
       </div>
 
-      {/* Main content */}
+      {/* Main content area (Bootstrap Grid col-md-9) */}
       <div className="col-md-9">
-        {/* Controls row */}
+        {/* Controls row: page size, sort toggle, and cart summary */}
         <div className="row mb-3 align-items-center">
           <div className="col-auto">
             <label className="me-2">Books per page:</label>
@@ -121,6 +128,8 @@ function BookList() {
               Sort: {sortOrder === 'asc' ? 'A \u2192 Z' : 'Z \u2192 A'}
             </button>
           </div>
+
+          {/* Cart summary with item count and total price */}
           <div className="col-auto ms-auto">
             <button className="btn btn-outline-success" onClick={goToCart}>
               Cart{' '}
@@ -130,7 +139,7 @@ function BookList() {
           </div>
         </div>
 
-        {/* Book count */}
+        {/* Page info with active category filter */}
         <p className="text-muted">
           Showing page {pageNum} of {totalPages} ({totalNumBooks} total books)
           {selectedCategory && (
@@ -141,15 +150,15 @@ function BookList() {
           )}
         </p>
 
+        {/* Loading and error states */}
         {loading && <p className="text-center mt-4">Loading books...</p>}
-
         {error && (
           <p className="text-center text-danger mt-4">{error}</p>
         )}
 
         {!loading && !error && (
           <>
-            {/* Books table */}
+            {/* Books table with responsive wrapper */}
             <div className="table-responsive">
               <table className="table table-striped table-bordered">
                 <thead className="table-dark">
@@ -190,9 +199,10 @@ function BookList() {
               </table>
             </div>
 
-            {/* Pagination */}
+            {/* Pagination controls */}
             <nav>
               <ul className="pagination justify-content-center">
+                {/* Previous page button */}
                 <li
                   className={`page-item ${pageNum === 1 ? 'disabled' : ''}`}
                 >
@@ -203,6 +213,8 @@ function BookList() {
                     Previous
                   </button>
                 </li>
+
+                {/* Numbered page buttons */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (num) => (
                     <li
@@ -218,6 +230,8 @@ function BookList() {
                     </li>
                   )
                 )}
+
+                {/* Next page button */}
                 <li
                   className={`page-item ${
                     pageNum === totalPages ? 'disabled' : ''

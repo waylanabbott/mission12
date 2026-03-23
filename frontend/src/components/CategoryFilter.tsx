@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 
+// Props for controlling which category is selected
 interface CategoryFilterProps {
   selectedCategory: string | null;
   onSelectCategory: (category: string | null) => void;
 }
 
+// Sidebar component that displays book categories using Bootstrap List Group
+// Fetches categories from the API and highlights the active selection
 function CategoryFilter({
   selectedCategory,
   onSelectCategory,
 }: CategoryFilterProps) {
   const [categories, setCategories] = useState<string[]>([]);
 
+  // Fetch distinct categories from the API on component mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -20,7 +24,7 @@ function CategoryFilter({
           setCategories(data);
         }
       } catch {
-        // Silently fail - categories just won't show
+        // Silently fail - categories sidebar just won't display
       }
     };
 
@@ -30,7 +34,10 @@ function CategoryFilter({
   return (
     <div>
       <h5 className="mb-3">Categories</h5>
+
+      {/* Bootstrap List Group for category selection */}
       <div className="list-group">
+        {/* "All Categories" option to clear the filter */}
         <button
           className={`list-group-item list-group-item-action ${
             selectedCategory === null ? 'active' : ''
@@ -39,6 +46,8 @@ function CategoryFilter({
         >
           All Categories
         </button>
+
+        {/* Individual category buttons */}
         {categories.map((cat) => (
           <button
             key={cat}

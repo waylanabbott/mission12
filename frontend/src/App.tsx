@@ -4,10 +4,14 @@ import Header from './components/Header';
 import BookList from './components/BookList';
 import CartPage from './components/CartPage';
 
+// Root application component with routing and cart state
 function App() {
   return (
     <CartProvider>
+      {/* Navigation bar with cart badge */}
       <Header />
+
+      {/* Main content area */}
       <div className="container mt-4">
         <Routes>
           <Route path="/" element={<BookList />} />

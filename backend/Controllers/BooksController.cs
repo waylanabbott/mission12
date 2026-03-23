@@ -4,6 +4,7 @@ using BookstoreApi.Data;
 
 namespace BookstoreApi.Controllers;
 
+// API controller for managing book data
 [Route("api/[controller]")]
 [ApiController]
 public class BooksController : ControllerBase
@@ -15,6 +16,7 @@ public class BooksController : ControllerBase
         _context = context;
     }
 
+    // GET /api/books - Returns paginated, sorted, and optionally filtered books
     [HttpGet]
     public async Task<IActionResult> GetBooks(
         int pageNum = 1,
@@ -24,24 +26,27 @@ public class BooksController : ControllerBase
     {
         var query = _context.Books.AsQueryable();
 
-        // Filter by category if provided
+        // Filter by category if a category is selected
         if (!string.IsNullOrEmpty(category))
         {
             query = query.Where(b => b.Category == category);
         }
 
+        // Count after filtering so pagination reflects the filtered set
         var totalNumBooks = await query.CountAsync();
 
-        // Sort by title
+        // Sort by title ascending or descending
         query = sortOrder.ToLower() == "desc"
             ? query.OrderByDescending(b => b.Title)
             : query.OrderBy(b => b.Title);
 
+        // Apply pagination using Skip and Take
         var books = await query
             .Skip((pageNum - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
+        // Build response with pagination metadata
         var result = new
         {
             books,
@@ -54,6 +59,7 @@ public class BooksController : ControllerBase
         return Ok(result);
     }
 
+    // GET /api/books/categories - Returns a list of distinct book categories
     [HttpGet("categories")]
     public async Task<IActionResult> GetCategories()
     {

@@ -1,14 +1,17 @@
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
+// Shopping cart page displaying all items with quantity controls and totals
 function CartPage() {
   const { items, removeFromCart, updateQuantity, totalPrice } = useCart();
   const navigate = useNavigate();
 
+  // Navigate back to the book list (restores previous browsing state via sessionStorage)
   const handleContinueShopping = () => {
     navigate('/');
   };
 
+  // Show empty cart message with a link back to browsing
   if (items.length === 0) {
     return (
       <div className="text-center mt-5">
@@ -28,6 +31,7 @@ function CartPage() {
     <div>
       <h2 className="mb-4">Shopping Cart</h2>
 
+      {/* Cart items table */}
       <div className="table-responsive">
         <table className="table table-striped table-bordered">
           <thead className="table-dark">
@@ -44,6 +48,8 @@ function CartPage() {
               <tr key={item.book.bookID}>
                 <td>{item.book.title}</td>
                 <td>${item.book.price.toFixed(2)}</td>
+
+                {/* Quantity controls: decrement, display, increment */}
                 <td style={{ width: '150px' }}>
                   <div className="d-flex align-items-center">
                     <button
@@ -65,7 +71,11 @@ function CartPage() {
                     </button>
                   </div>
                 </td>
+
+                {/* Subtotal = price * quantity */}
                 <td>${(item.book.price * item.quantity).toFixed(2)}</td>
+
+                {/* Remove item button */}
                 <td>
                   <button
                     className="btn btn-sm btn-danger"
@@ -77,6 +87,8 @@ function CartPage() {
               </tr>
             ))}
           </tbody>
+
+          {/* Cart total row */}
           <tfoot>
             <tr>
               <td colSpan={3} className="text-end fw-bold">
@@ -89,6 +101,7 @@ function CartPage() {
         </table>
       </div>
 
+      {/* Action buttons */}
       <div className="d-flex justify-content-between mt-3">
         <button
           className="btn btn-secondary"
