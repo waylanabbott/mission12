@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Book } from '../types/Book';
+import { API_BASE } from '../api';
 
 // Empty book template used to reset the form when adding a new book
 const emptyBook: Book = {
@@ -35,7 +36,7 @@ function AdminBooks() {
   const fetchBooks = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/books?pageSize=1000');
+      const response = await fetch(`${API_BASE}/api/books?pageSize=1000`);
       const data = await response.json();
       setBooks(data.books);
     } catch {
@@ -62,14 +63,14 @@ function AdminBooks() {
 
     if (editingId) {
       // Send PUT request to update the existing book
-      await fetch(`/api/books/${editingId}`, {
+      await fetch(`${API_BASE}/api/books/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
     } else {
       // Send POST request to add a new book
-      await fetch('/api/books', {
+      await fetch(`${API_BASE}/api/books`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -93,7 +94,7 @@ function AdminBooks() {
   const handleDelete = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this book?')) return;
 
-    await fetch(`/api/books/${id}`, { method: 'DELETE' });
+    await fetch(`${API_BASE}/api/books/${id}`, { method: 'DELETE' });
     fetchBooks();
   };
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Book, BookResponse } from '../types/Book';
 import { useCart } from '../context/CartContext';
 import CategoryFilter from './CategoryFilter';
+import { API_BASE } from '../api';
 
 // Main book listing page.
 // Displays books in a table with category filtering, pagination, sorting,
@@ -33,7 +34,7 @@ function BookList() {
 
       try {
         // Build the API URL with query parameters for pagination and filtering
-        let url = `/api/books?pageNum=${pageNum}&pageSize=${pageSize}&sortOrder=${sortOrder}`;
+        let url = `${API_BASE}/api/books?pageNum=${pageNum}&pageSize=${pageSize}&sortOrder=${sortOrder}`;
         if (selectedCategory) {
           url += `&category=${encodeURIComponent(selectedCategory)}`;
         }

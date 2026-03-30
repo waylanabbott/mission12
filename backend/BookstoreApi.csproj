@@ -11,4 +11,12 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.3" />
   </ItemGroup>
 
+  <!-- Include the SQLite database file in the published output -->
+  <ItemGroup>
+    <None Update="Bookstore.sqlite">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

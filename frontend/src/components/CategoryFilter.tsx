@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE } from '../api';
 
 // Props interface for the CategoryFilter component
 interface CategoryFilterProps {
@@ -20,7 +21,7 @@ function CategoryFilter({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/books/categories');
+        const response = await fetch(`${API_BASE}/api/books/categories`);
         if (response.ok) {
           const data: string[] = await response.json();
           setCategories(data);
