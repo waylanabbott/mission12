@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
 
-// Props for controlling which category is selected
+// Props interface for the CategoryFilter component
 interface CategoryFilterProps {
   selectedCategory: string | null;
   onSelectCategory: (category: string | null) => void;
 }
 
-// Sidebar component that displays book categories using Bootstrap List Group
-// Fetches categories from the API and highlights the active selection
+// Sidebar component that displays a list of book categories.
+// Uses Bootstrap List Group to show clickable category buttons.
+// The active category is highlighted, and clicking "All Categories" clears the filter.
 function CategoryFilter({
   selectedCategory,
   onSelectCategory,
 }: CategoryFilterProps) {
+  // State to hold the list of categories from the API
   const [categories, setCategories] = useState<string[]>([]);
 
-  // Fetch distinct categories from the API on component mount
+  // Fetch the distinct categories from the backend when the component mounts
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -24,7 +26,7 @@ function CategoryFilter({
           setCategories(data);
         }
       } catch {
-        // Silently fail - categories sidebar just won't display
+        // If the fetch fails, the sidebar just won't show categories
       }
     };
 
@@ -35,9 +37,9 @@ function CategoryFilter({
     <div>
       <h5 className="mb-3">Categories</h5>
 
-      {/* Bootstrap List Group for category selection */}
+      {/* Bootstrap List Group for category buttons */}
       <div className="list-group">
-        {/* "All Categories" option to clear the filter */}
+        {/* "All Categories" option - clears the active filter */}
         <button
           className={`list-group-item list-group-item-action ${
             selectedCategory === null ? 'active' : ''
@@ -47,7 +49,7 @@ function CategoryFilter({
           All Categories
         </button>
 
-        {/* Individual category buttons */}
+        {/* Render a button for each category from the API */}
         {categories.map((cat) => (
           <button
             key={cat}

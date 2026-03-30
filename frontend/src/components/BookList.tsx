@@ -4,10 +4,12 @@ import type { Book, BookResponse } from '../types/Book';
 import { useCart } from '../context/CartContext';
 import CategoryFilter from './CategoryFilter';
 
-// Main book listing page with category filtering, pagination, and cart integration
-// Uses Bootstrap Grid (row/col) for sidebar + main content layout
+// Main book listing page.
+// Displays books in a table with category filtering, pagination, sorting,
+// and the ability to add books to the shopping cart.
+// Uses Bootstrap Grid (row/col) for the sidebar + main content layout.
 function BookList() {
-  // Book data and pagination state
+  // State for book data and pagination
   const [books, setBooks] = useState<Book[]>([]);
   const [pageNum, setPageNum] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -18,17 +20,19 @@ function BookList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Get cart functions and totals from the cart context
   const { addToCart, totalItems, totalPrice } = useCart();
   const navigate = useNavigate();
 
-  // Fetch books from the API whenever pagination, sort, or category changes
+  // Fetch books from the API whenever the page, page size, sort order,
+  // or selected category changes
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // Build API URL with query parameters
+        // Build the API URL with query parameters for pagination and filtering
         let url = `/api/books?pageNum=${pageNum}&pageSize=${pageSize}&sortOrder=${sortOrder}`;
         if (selectedCategory) {
           url += `&category=${encodeURIComponent(selectedCategory)}`;
@@ -40,6 +44,7 @@ function BookList() {
           throw new Error('Failed to fetch books');
         }
 
+        // Parse the response and update state
         const data: BookResponse = await response.json();
         setBooks(data.books);
         setTotalPages(data.totalPages);
@@ -54,7 +59,8 @@ function BookList() {
     fetchBooks();
   }, [pageNum, pageSize, sortOrder, selectedCategory]);
 
-  // Reset to page 1 when category changes so user doesn't land on an empty page
+  // When the user picks a new category, reset to page 1
+  // so they don't land on an empty page
   const handleCategoryChange = (category: string | null) => {
     setSelectedCategory(category);
     setPageNum(1);
@@ -65,7 +71,8 @@ function BookList() {
     addToCart(book);
   };
 
-  // Navigate to the cart page and save current browsing state for "Continue Shopping"
+  // Save the current browsing state and navigate to the cart page.
+  // This allows "Continue Shopping" to return the user to the same page.
   const goToCart = () => {
     sessionStorage.setItem(
       'lastBookListState',
@@ -74,7 +81,8 @@ function BookList() {
     navigate('/cart');
   };
 
-  // Restore browsing state on mount so "Continue Shopping" returns to the same page
+  // On mount, restore the previous browsing state if the user clicked
+  // "Continue Shopping" from the cart page
   useEffect(() => {
     const saved = sessionStorage.getItem('lastBookListState');
     if (saved) {
@@ -89,7 +97,7 @@ function BookList() {
 
   return (
     <div className="row">
-      {/* Category filter sidebar (Bootstrap Grid col-md-3) */}
+      {/* Left sidebar: category filter (Bootstrap Grid col-md-3) */}
       <div className="col-md-3 mb-4">
         <CategoryFilter
           selectedCategory={selectedCategory}
@@ -97,9 +105,9 @@ function BookList() {
         />
       </div>
 
-      {/* Main content area (Bootstrap Grid col-md-9) */}
+      {/* Right side: main content area (Bootstrap Grid col-md-9) */}
       <div className="col-md-9">
-        {/* Controls row: page size, sort toggle, and cart summary */}
+        {/* Controls row: page size selector, sort button, and cart summary */}
         <div className="row mb-3 align-items-center">
           <div className="col-auto">
             <label className="me-2">Books per page:</label>
@@ -108,7 +116,7 @@ function BookList() {
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
-                setPageNum(1);
+                setPageNum(1); // Reset to page 1 when changing page size
               }}
             >
               <option value={5}>5</option>
@@ -122,14 +130,14 @@ function BookList() {
               className="btn btn-outline-primary"
               onClick={() => {
                 setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                setPageNum(1);
+                setPageNum(1); // Reset to page 1 when changing sort
               }}
             >
-              Sort: {sortOrder === 'asc' ? 'A \u2192 Z' : 'Z \u2192 A'}
+              Sort: {sortOrder === 'asc' ? 'A → Z' : 'Z → A'}
             </button>
           </div>
 
-          {/* Cart summary with item count and total price */}
+          {/* Cart summary button showing item count and total price */}
           <div className="col-auto ms-auto">
             <button className="btn btn-outline-success" onClick={goToCart}>
               Cart{' '}
@@ -139,7 +147,7 @@ function BookList() {
           </div>
         </div>
 
-        {/* Page info with active category filter */}
+        {/* Show current page info and active category filter */}
         <p className="text-muted">
           Showing page {pageNum} of {totalPages} ({totalNumBooks} total books)
           {selectedCategory && (
@@ -156,9 +164,10 @@ function BookList() {
           <p className="text-center text-danger mt-4">{error}</p>
         )}
 
+        {/* Book table and pagination - only shown when data is loaded */}
         {!loading && !error && (
           <>
-            {/* Books table with responsive wrapper */}
+            {/* Books table wrapped in table-responsive for smaller screens */}
             <div className="table-responsive">
               <table className="table table-striped table-bordered">
                 <thead className="table-dark">
@@ -175,6 +184,7 @@ function BookList() {
                   </tr>
                 </thead>
                 <tbody>
+                  {/* Render a row for each book */}
                   {books.map((book) => (
                     <tr key={book.bookID}>
                       <td>{book.title}</td>
@@ -186,6 +196,7 @@ function BookList() {
                       <td>{book.pageCount}</td>
                       <td>${book.price.toFixed(2)}</td>
                       <td>
+                        {/* Add to Cart button for each book */}
                         <button
                           className="btn btn-sm btn-success"
                           onClick={() => handleAddToCart(book)}
@@ -199,10 +210,10 @@ function BookList() {
               </table>
             </div>
 
-            {/* Pagination controls */}
+            {/* Pagination controls using Bootstrap pagination component */}
             <nav>
               <ul className="pagination justify-content-center">
-                {/* Previous page button */}
+                {/* Previous page button - disabled on first page */}
                 <li
                   className={`page-item ${pageNum === 1 ? 'disabled' : ''}`}
                 >
@@ -214,7 +225,7 @@ function BookList() {
                   </button>
                 </li>
 
-                {/* Numbered page buttons */}
+                {/* Numbered page buttons - highlights the active page */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (num) => (
                     <li
@@ -231,7 +242,7 @@ function BookList() {
                   )
                 )}
 
-                {/* Next page button */}
+                {/* Next page button - disabled on last page */}
                 <li
                   className={`page-item ${
                     pageNum === totalPages ? 'disabled' : ''

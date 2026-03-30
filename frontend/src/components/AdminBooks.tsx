@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Book } from '../types/Book';
 
-// Empty book template used to reset the form
+// Empty book template used to reset the form when adding a new book
 const emptyBook: Book = {
   bookID: 0,
   title: '',
@@ -14,20 +14,24 @@ const emptyBook: Book = {
   price: 0,
 };
 
-// Admin page for adding, editing, and deleting books
+// Admin page for managing books in the database.
+// Provides a form to add new books or edit existing ones,
+// and a table listing all books with edit and delete buttons.
 function AdminBooks() {
+  // State for the list of books and the form
   const [books, setBooks] = useState<Book[]>([]);
   const [formData, setFormData] = useState<Book>({ ...emptyBook });
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all books when the component mounts
+  // Fetch all books when the component first mounts
   useEffect(() => {
     fetchBooks();
   }, []);
 
-  // Load all books from the API (no pagination needed for admin view)
+  // Load all books from the API.
+  // Uses a large page size since the admin page shows all books at once.
   const fetchBooks = async () => {
     setLoading(true);
     try {
@@ -41,7 +45,8 @@ function AdminBooks() {
     }
   };
 
-  // Handle input changes for the form fields
+  // Handle input changes in the form.
+  // Converts pageCount and price to numbers since they come as strings from inputs.
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({
@@ -50,19 +55,20 @@ function AdminBooks() {
     });
   };
 
-  // Handle form submission for both adding and editing
+  // Handle form submission for both adding and editing books.
+  // If editingId is set, sends a PUT request; otherwise sends a POST.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (editingId) {
-      // Update an existing book
+      // Send PUT request to update the existing book
       await fetch(`/api/books/${editingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
     } else {
-      // Add a new book
+      // Send POST request to add a new book
       await fetch('/api/books', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,19 +76,20 @@ function AdminBooks() {
       });
     }
 
-    // Reset form and refresh the book list
+    // Reset the form and refresh the book list
     setFormData({ ...emptyBook });
     setEditingId(null);
     fetchBooks();
   };
 
-  // Populate the form with the selected book's data for editing
+  // When the user clicks Edit, populate the form with that book's data
   const handleEdit = (book: Book) => {
     setFormData(book);
     setEditingId(book.bookID);
   };
 
-  // Delete a book after confirming with the user
+  // Delete a book after the user confirms.
+  // Sends a DELETE request and then refreshes the list.
   const handleDelete = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this book?')) return;
 
@@ -90,12 +97,13 @@ function AdminBooks() {
     fetchBooks();
   };
 
-  // Cancel editing and reset the form
+  // Cancel editing and clear the form back to its default state
   const handleCancel = () => {
     setFormData({ ...emptyBook });
     setEditingId(null);
   };
 
+  // Show loading or error messages while data is being fetched
   if (loading) return <p className="text-center mt-4">Loading books...</p>;
   if (error) return <p className="text-center text-danger mt-4">{error}</p>;
 
@@ -103,13 +111,15 @@ function AdminBooks() {
     <div>
       <h2 className="mb-4">Admin - Manage Books</h2>
 
-      {/* Add/Edit book form */}
+      {/* Add/Edit form inside a Bootstrap card */}
       <div className="card mb-4">
         <div className="card-header">
+          {/* Header changes based on whether we're adding or editing */}
           {editingId ? 'Edit Book' : 'Add New Book'}
         </div>
         <div className="card-body">
           <form onSubmit={handleSubmit}>
+            {/* First row: Title and Author fields */}
             <div className="row mb-3">
               <div className="col-md-6">
                 <label className="form-label">Title</label>
@@ -135,6 +145,7 @@ function AdminBooks() {
               </div>
             </div>
 
+            {/* Second row: Publisher and ISBN fields */}
             <div className="row mb-3">
               <div className="col-md-6">
                 <label className="form-label">Publisher</label>
@@ -160,6 +171,7 @@ function AdminBooks() {
               </div>
             </div>
 
+            {/* Third row: Classification, Category, Page Count, and Price */}
             <div className="row mb-3">
               <div className="col-md-3">
                 <label className="form-label">Classification</label>
@@ -208,10 +220,11 @@ function AdminBooks() {
               </div>
             </div>
 
-            {/* Submit and Cancel buttons */}
+            {/* Submit button text changes based on add vs edit mode */}
             <button type="submit" className="btn btn-primary me-2">
               {editingId ? 'Update Book' : 'Add Book'}
             </button>
+            {/* Cancel button only shows when editing */}
             {editingId && (
               <button
                 type="button"
@@ -225,7 +238,7 @@ function AdminBooks() {
         </div>
       </div>
 
-      {/* Books table with edit and delete actions */}
+      {/* Table listing all books with edit and delete actions */}
       <div className="table-responsive">
         <table className="table table-striped table-bordered">
           <thead className="table-dark">
@@ -238,6 +251,7 @@ function AdminBooks() {
             </tr>
           </thead>
           <tbody>
+            {/* Render a row for each book with edit and delete buttons */}
             {books.map((book) => (
               <tr key={book.bookID}>
                 <td>{book.title}</td>
@@ -245,12 +259,14 @@ function AdminBooks() {
                 <td>{book.category}</td>
                 <td>${book.price.toFixed(2)}</td>
                 <td>
+                  {/* Edit button - loads book data into the form above */}
                   <button
                     className="btn btn-sm btn-warning me-2"
                     onClick={() => handleEdit(book)}
                   >
                     Edit
                   </button>
+                  {/* Delete button - shows confirmation dialog first */}
                   <button
                     className="btn btn-sm btn-danger"
                     onClick={() => handleDelete(book.bookID)}

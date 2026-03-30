@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { Book, CartItem } from '../types/Book';
 
-// Shape of the cart context value
+// Define the shape of the cart context so components know what's available
 interface CartContextType {
   items: CartItem[];
   addToCart: (book: Book) => void;
@@ -13,42 +13,51 @@ interface CartContextType {
   totalPrice: number;
 }
 
+// Create the context with undefined as the default value
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Provides cart state to all child components and persists cart in sessionStorage
+// CartProvider wraps the app and provides cart state to all child components.
+// The cart is persisted in sessionStorage so it survives page navigation.
 export function CartProvider({ children }: { children: ReactNode }) {
-  // Initialize cart from sessionStorage so it persists across page navigation
+  // Initialize cart items from sessionStorage on first load.
+  // If there's saved cart data, parse it; otherwise start with an empty array.
   const [items, setItems] = useState<CartItem[]>(() => {
     const saved = sessionStorage.getItem('cart');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // Sync cart state to sessionStorage whenever it changes
+  // Save the cart to sessionStorage whenever the items change.
+  // This ensures the cart persists as the user navigates between pages.
   useEffect(() => {
     sessionStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  // Add a book to the cart, or increment quantity if already present
+  // Add a book to the cart.
+  // If the book is already in the cart, increment its quantity by 1.
+  // Otherwise, add it as a new item with quantity 1.
   const addToCart = (book: Book) => {
     setItems((prev) => {
       const existing = prev.find((item) => item.book.bookID === book.bookID);
       if (existing) {
+        // Book already in cart - increase quantity
         return prev.map((item) =>
           item.book.bookID === book.bookID
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
+      // New book - add to cart with quantity 1
       return [...prev, { book, quantity: 1 }];
     });
   };
 
-  // Remove a book entirely from the cart
+  // Remove a book entirely from the cart by filtering it out
   const removeFromCart = (bookID: number) => {
     setItems((prev) => prev.filter((item) => item.book.bookID !== bookID));
   };
 
-  // Update the quantity of a specific book; removes if quantity drops to 0
+  // Update the quantity of a specific book in the cart.
+  // If the new quantity is 0 or less, remove the book instead.
   const updateQuantity = (bookID: number, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(bookID);
@@ -64,13 +73,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Clear all items from the cart
   const clearCart = () => setItems([]);
 
-  // Computed totals for display in the header and cart summary
+  // Calculate the total number of items (sum of all quantities)
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Calculate the total price (sum of price * quantity for each item)
   const totalPrice = items.reduce(
     (sum, item) => sum + item.book.price * item.quantity,
     0
   );
 
+  // Provide the cart state and functions to all child components
   return (
     <CartContext.Provider
       value={{
@@ -88,7 +100,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Custom hook for accessing the cart context from any component
+// Custom hook for accessing the cart context.
+// Must be used inside a CartProvider or it will throw an error.
 export function useCart() {
   const context = useContext(CartContext);
   if (!context) {

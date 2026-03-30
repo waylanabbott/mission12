@@ -1,17 +1,22 @@
 using Microsoft.EntityFrameworkCore;
 using BookstoreApi.Data;
 
+// Create the web application builder
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+// Register controller services for handling API requests
 builder.Services.AddControllers();
+
+// Add OpenAPI/Swagger support for API documentation
 builder.Services.AddOpenApi();
 
-// Configure SQLite database connection
+// Register the Entity Framework database context with SQLite
+// The connection string is stored in appsettings.json
 builder.Services.AddDbContext<BookstoreContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("BookstoreConnection")));
 
-// Configure CORS to allow requests from the React dev server
+// Configure CORS (Cross-Origin Resource Sharing) to allow
+// the React frontend to make requests to this API
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactDev", policy =>
@@ -22,17 +27,19 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Build the application
 var app = builder.Build();
 
-// Enable OpenAPI in development mode
+// Enable OpenAPI endpoint only in development mode
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-// Middleware pipeline
-app.UseCors("AllowReactDev");
-app.UseAuthorization();
-app.MapControllers();
+// Set up the middleware pipeline
+app.UseCors("AllowReactDev"); // Apply CORS policy
+app.UseAuthorization();       // Enable authorization middleware
+app.MapControllers();         // Map controller routes
 
+// Start the application
 app.Run();

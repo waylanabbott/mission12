@@ -1,17 +1,22 @@
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
-// Shopping cart page displaying all items with quantity controls and totals
+// Shopping cart page that displays all items the user has added.
+// Shows each item with its price, quantity controls, and subtotal.
+// Includes a total at the bottom and a "Continue Shopping" button.
 function CartPage() {
+  // Get cart items and functions from the cart context
   const { items, removeFromCart, updateQuantity, totalPrice } = useCart();
   const navigate = useNavigate();
 
-  // Navigate back to the book list (restores previous browsing state via sessionStorage)
+  // Go back to the book list page.
+  // The BookList component will restore the user's previous browsing state
+  // (page number, category, etc.) from sessionStorage.
   const handleContinueShopping = () => {
     navigate('/');
   };
 
-  // Show empty cart message with a link back to browsing
+  // If the cart is empty, show a friendly message with a link back to browsing
   if (items.length === 0) {
     return (
       <div className="text-center mt-5">
@@ -31,7 +36,7 @@ function CartPage() {
     <div>
       <h2 className="mb-4">Shopping Cart</h2>
 
-      {/* Cart items table */}
+      {/* Cart items table showing title, price, quantity, and subtotal */}
       <div className="table-responsive">
         <table className="table table-striped table-bordered">
           <thead className="table-dark">
@@ -44,12 +49,13 @@ function CartPage() {
             </tr>
           </thead>
           <tbody>
+            {/* Loop through each item in the cart */}
             {items.map((item) => (
               <tr key={item.book.bookID}>
                 <td>{item.book.title}</td>
                 <td>${item.book.price.toFixed(2)}</td>
 
-                {/* Quantity controls: decrement, display, increment */}
+                {/* Quantity controls with minus and plus buttons */}
                 <td style={{ width: '150px' }}>
                   <div className="d-flex align-items-center">
                     <button
@@ -72,10 +78,10 @@ function CartPage() {
                   </div>
                 </td>
 
-                {/* Subtotal = price * quantity */}
+                {/* Subtotal for this line item (price x quantity) */}
                 <td>${(item.book.price * item.quantity).toFixed(2)}</td>
 
-                {/* Remove item button */}
+                {/* Remove button to delete this item from the cart */}
                 <td>
                   <button
                     className="btn btn-sm btn-danger"
@@ -88,7 +94,7 @@ function CartPage() {
             ))}
           </tbody>
 
-          {/* Cart total row */}
+          {/* Footer row showing the grand total */}
           <tfoot>
             <tr>
               <td colSpan={3} className="text-end fw-bold">
@@ -101,7 +107,7 @@ function CartPage() {
         </table>
       </div>
 
-      {/* Action buttons */}
+      {/* Action buttons: continue shopping or proceed to checkout */}
       <div className="d-flex justify-content-between mt-3">
         <button
           className="btn btn-secondary"

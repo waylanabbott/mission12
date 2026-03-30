@@ -1,4 +1,5 @@
-// Represents a single book from the API
+// Represents a single book from the API.
+// Each field matches a column in the Books database table.
 export interface Book {
   bookID: number;
   title: string;
@@ -11,7 +12,8 @@ export interface Book {
   price: number;
 }
 
-// Response shape from the paginated GET /api/books endpoint
+// Response shape returned by the paginated GET /api/books endpoint.
+// Includes the list of books and pagination metadata.
 export interface BookResponse {
   books: Book[];
   totalNumBooks: number;
@@ -20,7 +22,7 @@ export interface BookResponse {
   totalPages: number;
 }
 
-// Represents a book and its quantity in the shopping cart
+// Represents a book and its quantity in the shopping cart.
 export interface CartItem {
   book: Book;
   quantity: number;
