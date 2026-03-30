@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 // Navigation bar displayed at the top of every page
-// Uses Bootstrap Badge (rounded-pill) to show cart item count
 function Header() {
   const { totalItems, totalPrice } = useCart();
 
@@ -14,7 +13,17 @@ function Header() {
           Online Bookstore
         </Link>
 
-        {/* Cart button with Bootstrap Badge showing item count and total */}
+        {/* Navigation links */}
+        <div className="navbar-nav me-auto">
+          <Link className="nav-link" to="/">
+            Books
+          </Link>
+          <Link className="nav-link" to="/adminbooks">
+            Admin
+          </Link>
+        </div>
+
+        {/* Cart button with item count and total */}
         <Link to="/cart" className="btn btn-outline-light position-relative">
           Cart
           {totalItems > 0 && (

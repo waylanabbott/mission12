@@ -3,6 +3,7 @@ import { CartProvider } from './context/CartContext';
 import Header from './components/Header';
 import BookList from './components/BookList';
 import CartPage from './components/CartPage';
+import AdminBooks from './components/AdminBooks';
 
 // Root application component with routing and cart state
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Routes>
           <Route path="/" element={<BookList />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/adminbooks" element={<AdminBooks />} />
         </Routes>
       </div>
     </CartProvider>
